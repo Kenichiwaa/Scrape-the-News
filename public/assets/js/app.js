@@ -17,9 +17,34 @@ $(document).on("click", "p", function() {
     url: "/articles/" + thisId
   })
   .done(function(data) {
+    $("#notes").append("<h2>" + data.title + "</h2>");
     $("#notes").append("<input id='titleinput' name='title'>");
     $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
-    $("#notes").append("<button data-id='" + data._id + "id='savenote'> Save Note</button");
+    $("#notes").append("<button data-id='" + data._id + "' id='savenote'> Save Note</button");
+
+    if(data.note) {
+      $("#titleinput").val(data.note.title);
+      $("#bodyinut").val(data.note.body);
+    }
   });
-  // Add the note info to the page
+});
+
+$(document).on("click", "#savenote", function() {
+  var thisId = $(this).attr("data-id");
+
+    $.ajax({
+      method: "POST",
+      url: "/articles/" + thisId,
+      data: {
+        title: $("#titleinput").val(),
+        body: $("#bodyinput").val()
+      }
+    })
+    .done(function(data) {
+      console.log("save note function data: " + data);
+      $("#notes").empty();
+    });
+
+    $("#titleinput").val("");
+    $("#bodyinput").val("");
 });
