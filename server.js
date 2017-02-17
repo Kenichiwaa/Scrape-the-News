@@ -1,105 +1,70 @@
+
 // Dependencies
+var fs = require('fs');
+var hbss = require('handlebars'); // for hbs partial routing
 
-var express = require("express");
-var bodyParser = require("body-parser");
-var logger = require("morgan");
-var mongoose = require("mongoose");
+var express = require('express');
+var path = require('path');
+var favicon = require('serve-favicon');
+var logger = require('morgan');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var hbs = require('express-handlebars');
 
-// Require Note and Article models
-var Note = require("../models/Note.js");
-var Article = require("../models/Article.js");
+var routes = require('./routes/index');
 
-// Dependencies for scraping
-var request = require("request");
-var cheerio = require("cheerio");
-
-// promise for mongoose
-var Promise = require("bluebird");
-
-mongoose.Promise = Promise;
-
-// Initialize express
 var app = express();
 
-// Use morgan and body parser with our app
-app.use(logger("dev"));
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+// view engine setup
+app.engine('hbs', hbs({extname: 'hbs', defaultLayout: 'layout', layoutsDir: __dirname + '/views/layouts/'}));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hbs');
 
-// use public directory
-app.use(express.static("public"));
+// route hbs partials
+hbss.registerPartial('nav', fs.readFileSync(__dirname + '/views/partials/nav.hbs', 'utf8'));
+hbss.registerPartial('parallax', fs.readFileSync(__dirname + '/views/partials/parallax.hbs', 'utf8'));
 
-// configure database with mongoose
-mongoose.connect("mongodb://localhost/week18day3mongoose");
-var db = mongoose.connection;
 
-// show mongoose errors
-db.on("error", function(error) {
-  console.log("Mongoose Error: ", error);
+// uncomment after placing your favicon in /public
+//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(logger('dev'));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('/', routes);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
-// one time listener function for the event "open"
-db.once("open", function() {
-  console.log("Mongoose connection successful");
-});
+// error handlers
 
-// Routes
-// ======
-
-// Index route
-app.get("/", function(req, res) {
-  res.send(index.html);
-});
-
-// route that sends mongo database
-app.get("/all", function(req, res) {
-  console.log("I am in the route all!");
-  db.scrapedData.find({}, function(error, found) {
-    res.json(found);
-    console.log("results!");
-    console.log(found);
-  });
-});
-
-app.get("/scrape", function(req, res) {
-
-  request('http://www.roadandtrack.com/', function (error, response, html) {
-    var $ = cheerio.load(html);
-    var result = [];
-
-    $('a.landing-feed--story-title').each(function(i, element){
-
-      var link = $(element).attr("href");
-      var title = $(element).text();
-      var picture = $(element).closest("img")[0];
-
-      // Save these results in an object that we'll push into the result array we defined earlier
-      result.push({
-        title: title,
-        link: 'http://www.roadandtrack.com' + link,
-        picture: "picture" + picture
-      });
-      });
-    db.scrapedData.insert(result, function(result) {
-      res.send("successful");
+// development error handler
+// will print stacktrace
+if (app.get('env') === 'development') {
+  app.use(function(err, req, res, next) {
+    res.status(err.status || 500);
+    res.render('error', {
+      message: err.message,
+      error: err
     });
-    console.log(result);
-    console.log("scrapped data");
   });
+}
 
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.render('error', {
+    message: err.message,
+    error: {}
+  });
 });
 
 
-
-
-
-
-
-
-// listen on port 3000
-var PORT = process.env.PORT || 3000;
-
-app.listen(PORT, function() {
-  console.log("App running on port: " + PORT);
-});
+module.exports = app;
