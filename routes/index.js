@@ -36,16 +36,14 @@ router.get('/', function(req, res, next) {
 });
 
 
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-// grab articles from mongoose
+// -----------------------------------------------
+// ------------ Grab all articles ----------------
 router.get("/articles", function(req, res) {
 
   Article.find({}, function(err, doc) {
     if(err) {
       console.log("Article get error :" + err);
     }
-    // send json object to the broswer
     else {
       res.json(doc);
     }
@@ -53,7 +51,7 @@ router.get("/articles", function(req, res) {
 });
 
 // ---------------------------------------
-// ---------------------------------------
+// -- Grab all with saveArticle as true --
 
 router.get("/saved", function(req, res) {
   Article.find({ "saveArticle": true }, function(err, doc) {
@@ -69,7 +67,7 @@ router.get("/saved", function(req, res) {
 });
 
 // ---------------------------------------
-// ---------------------------------------
+// ------- Scrape the Internet -----------
 router.get("/scrape", function(req, res) {
 
     request('http://www.roadandtrack.com/', function(error, response, html) {
@@ -93,63 +91,28 @@ router.get("/scrape", function(req, res) {
     res.send("Scrape Complete");
 });
 
-
-// -----------------------------------------------------------------------------
-
-// -----------------------------------------------------------------------------
-
-// scrape from website
-// router.get("/scrape", function(req, res) {
-//   // request site to scrape and return data as a callback
-//   request('http://www.roadandtrack.com/', function (error, response, html) {
-//     var $ = cheerio.load(html);
-//     // select desired classes to target
-//     $('a.landing-feed--story-title').each(function(i, element){
-//
-//       // Save these results in an object that we'll push into the result array we defined earlier
-//       var result = {};
-//       result.title = $(element).text();
-//       result.link = 'http://www.roadandtrack.com' + $(element).attr("href");
-//
-//       // create new entry using Article model
-//       var entry = new Article(result);
-//
-//       entry.save(function(err, doc) {
-//         if(err) {
-//           console.log("Article save error :" + err);
-//         }
-//         else {
-//           console.log(doc);
-//           res.json(doc);
-//         }
-//       });
-//     });
-//   });
-//   res.send("Scrape Complete");
-// });
-
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
+// -----------------------------------------------
+// ---------------- Create a note  ---------------
 
 // grab articles by article ID
 router.get("/articles/:id", function(req, res) {
-  Article.findOne({"_id": req.params.id})
-  // populate note associated with this id
-  .populate("note")
-  // execute the query
-  .exec(function(err, doc) {
-    // log any errors
-    if(err) {
-      console.log("Populating note error :" + err);
-    }
-    else {
-      res.json(doc);
-    }
-  });
+
+    Article.findOne(
+        {"_id":
+              req.params.id
+        })
+      .populate("note")
+      .exec(function(err, doc) {
+        if (err) {
+            console.log("Populating note error :" + err);
+        } else {
+            res.json(doc);
+        }
+    });
 });
 
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
+// -----------------------------------------------
+// ------------ Create a New Note ----------------
 
 // Create a new note, or replace an existing one
 router.post("/articles/:id", function(req, res) {
@@ -161,7 +124,11 @@ router.post("/articles/:id", function(req, res) {
       console.log("Error saving new note: " + err);
     }
     else {
-      Article.findOneAndUpdate({ "_id": req.params.id }, { "note": doc._id} )
+      Article.findOneAndUpdate(  {
+                                  "_id": req.params.id
+                                 }, {
+                                   "note": doc._id
+                                 } )
       .exec(function(err, doc) {
         if(err) {
           console.log("Error finding article to update with note :" + err);
@@ -174,6 +141,8 @@ router.post("/articles/:id", function(req, res) {
   });
 });
 
+// -----------------------------------------------
+// ------------ Archive and Article --------------
 
 router.post("/saveArticle/:id", function(req, res) {
   Article.findOneAndUpdate( {"_id": req.params.id,}, {"saveArticle": true} )
@@ -187,6 +156,8 @@ router.post("/saveArticle/:id", function(req, res) {
           });
 });
 
+// ------------------------------------------------
+// ---------- Remove an Article -------------------
 
 router.post("/deleteArticle/:id", function(req, res) {
   Article.findOneAndUpdate( {"_id": req.params.id,}, {"saveArticle": false} )
@@ -200,5 +171,7 @@ router.post("/deleteArticle/:id", function(req, res) {
           });
 });
 
+// -----------------------------------------------
+// -----------------------------------------------
 
 module.exports = router;

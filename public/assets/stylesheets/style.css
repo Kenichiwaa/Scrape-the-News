@@ -5,6 +5,14 @@ body { background-color: #F2F6D0 }
   margin-right: auto;
 }
 
+#articles {
+  margin-top: 100px;
+}
+
+#saveArticle, #deleteArticle {
+  float: right;
+}
+
 #notes {
   float: right;
   width: 70%;
