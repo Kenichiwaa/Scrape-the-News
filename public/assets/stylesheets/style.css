@@ -4,15 +4,10 @@ body { background-color: #F2F6D0 }
   margin-left: auto;
   margin-right: auto;
 }
-#articles {
-  display: inline-block;
-  overflow: auto;
-  width: 60%;
-  height: 700px;
-}
+
 #notes {
   float: right;
-  width: 30%;
+  width: 70%;
 }
 textarea, input {
   display: block;
@@ -25,7 +20,7 @@ input {
 }
 textarea {
   height: 200px;
-  font-size: 18px;
+  font-size: 38px;
 }
 
 /*Parallax Jumbotron*/
@@ -123,4 +118,9 @@ textarea {
     font-variant: normal;
     font-weight: 500;
     line-height: 15px;
+}
+
+/*modal CSS*/
+.modal-body {
+  padding:40px;
 }

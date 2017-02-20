@@ -1,5 +1,7 @@
-
+// ----------------------------------------------
+// ----------------------------------------------
 $(document).on("click", "#scrape", function() {
+  $("#articles").empty();
     $.ajax({
       method: "GET",
       url: "/articles"
@@ -11,9 +13,12 @@ $(document).on("click", "#scrape", function() {
       }
     });
 });
-
+// ----------------------------------------------
+// ----------------------------------------------/
 
 $(document).on("click", "#saved", function() {
+  var count = 0;
+  $("#articles").empty();
     $.ajax({
       method: "GET",
       url: "/saved"
@@ -21,10 +26,11 @@ $(document).on("click", "#saved", function() {
     .done(function(data) {
       console.log(data);
       for (var i = 0; i < data.length; i++) {
-        $(".parallax-window").hide();
-        $("#articles").append("<p class='well' data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "<br />" + data[i].text + "<button type='button' "+ "data-id='" + data[i]._id +"' id='addNote' class='btn btn-secondary'>Add Note</button><button type='button' "+ "data-id='" + data[i]._id +"' id='saveArticle' class='btn btn-secondary'>Save!</button></p>");
+        $("#articles").append("<p class='well' data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "<br />" + data[i].text + "<button type='button' "+ "data-id='" + data[i]._id +"' id='addNote' class='btn btn-secondary'>Add Note</button><button type='button' "+ "data-id='" + data[i]._id +"' id='deleteArticle' class='btn btn-secondary'>Delete</button></p>");
+        count++;
       }
     });
+
 });
 
 // grab articles as a JSON object
@@ -36,11 +42,11 @@ $(document).on("click", "#saved", function() {
 //       count++;
 //     }
 //   })
-//   .done(function() {
-//     $('.modal-body').text("Added " + count + "new articles!");
-//     $('#myModal').modal('show');
-//     count = 0;
-//   });
+  // .done(function() {
+  //   $('.modal-body').text("Added " + count + "new articles!");
+  //   $('#myModal').modal('show');
+  //   count = 0;
+  // });
 // });
 
 $(document).on("click", "#addNote", function() {
@@ -108,6 +114,25 @@ $(document).on("click", "#saveArticle", function() {
     }
     else {
       console.log("Saved article: " + data);
+    }
+  });
+});
+
+// save article to database
+$(document).on("click", "#deleteArticle", function() {
+  var thisId = $(this).attr("data-id");
+  $.ajax({
+    method: "POST",
+    url: "/deleteArticle/" + thisId,
+    data: {
+      saveArticle: false
+    }
+  }).done(function(err, data) {
+    if(err) {
+      console.log("Error removing article: " + err);
+    }
+    else {
+      console.log("Removed article: " + data);
     }
   });
 });

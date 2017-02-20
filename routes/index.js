@@ -52,57 +52,45 @@ router.get("/articles", function(req, res) {
   });
 });
 
+// ---------------------------------------
+// ---------------------------------------
+
 router.get("/saved", function(req, res) {
-  Article.find({saveArticle: true}, function(err, doc) {
+  Article.find({ "saveArticle": true }, function(err, doc) {
     if(err) {
       console.log("Error finding saved articles: " + err);
     }
     // send json object to the broswer
     else {
       res.json(doc);
+      console.log("Saved articles: " + doc);
     }
   });
 });
 
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
-// I think you need to have an empty array outside the .each function
-// and inside the .each function declare a result object. Build it, then push
-// to the array at the end of the .each loop. Then send the array filled with
-// results objects
-
-
-// // scrape from website
+// ---------------------------------------
+// ---------------------------------------
 router.get("/scrape", function(req, res) {
-  // request site to scrape and return data as a callback
-  request('http://www.roadandtrack.com/', function (error, response, html) {
-    var $ = cheerio
-      .load(html);
-    // select desired classes to target
-    $('a.landing-feed--story-title')
-      .each(function(i, element){
-        var result = {};
-        // Save these results in an object that we'll push into the result array we defined earlier
-        result.title = $(element).text();
-        result.link = 'http://www.roadandtrack.com' + $(element).attr("href");
-        result.saveArticle = false;
-        // This effectively passes the result object to the entry (and the title and link)
-        var entry = new Article(result);
 
-        // Now, save that entry to the db
-        entry.save(function(err, doc) {
-          // Log any errors
-          if (err) {
-            console.log(err);
-          }
-          // Or log the doc
-          else {
-            //console.log(doc);
-          }
+    request('http://www.roadandtrack.com/', function(error, response, html) {
+        var $ = cheerio.load(html);
+        $('a.landing-feed--story-title').each(function(i, element) {
+            var result = {};
+            result.title = $(element).text();
+            result.link = 'http://www.roadandtrack.com' + $(element).attr("href");
+            result.saveArticle = false;
+
+            var entry = new Article(result);
+            entry.save(function(err, doc) {
+                if (err) {
+                    console.log(err);
+                } else {
+                    //console.log(doc);
+                }
+            });
         });
     });
-  });
-  res.send("Scrape Complete");
+    res.send("Scrape Complete");
 });
 
 
@@ -189,6 +177,19 @@ router.post("/articles/:id", function(req, res) {
 
 router.post("/saveArticle/:id", function(req, res) {
   Article.findOneAndUpdate( {"_id": req.params.id,}, {"saveArticle": true} )
+          .exec(function(err, doc) {
+            if(err) {
+              console.log("Error finding article to update with note :" + err);
+            }
+            else {
+              res.send("Article saved!: " + doc);
+            }
+          });
+});
+
+
+router.post("/deleteArticle/:id", function(req, res) {
+  Article.findOneAndUpdate( {"_id": req.params.id,}, {"saveArticle": false} )
           .exec(function(err, doc) {
             if(err) {
               console.log("Error finding article to update with note :" + err);
