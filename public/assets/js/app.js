@@ -7,11 +7,25 @@ $(document).on("click", "#scrape", function() {
     .done(function(data) {
       console.log(data);
       for (var i = 0; i < data.length; i++) {
-        $("#articles").append("<p class='well' data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "<br />" + data[i].text + "<button type='button' "+ "data-id='" + data[i]._id +"' id='addNote' class='btn btn-secondary'>Secondary</button></p>");
+        $("#articles").append("<p class='well' data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "<br />" + data[i].text + "<button type='button' "+ "data-id='" + data[i]._id +"' id='addNote' class='btn btn-secondary'>Add Note</button><button type='button' "+ "data-id='" + data[i]._id +"' id='saveArticle' class='btn btn-secondary'>Save!</button></p>");
       }
     });
 });
 
+
+$(document).on("click", "#saved", function() {
+    $.ajax({
+      method: "GET",
+      url: "/saved"
+    })
+    .done(function(data) {
+      console.log(data);
+      for (var i = 0; i < data.length; i++) {
+        $(".parallax-window").hide();
+        $("#articles").append("<p class='well' data-id='" + data[i]._id + "'>" + data[i].title + "<br />" + data[i].link + "<br />" + data[i].text + "<button type='button' "+ "data-id='" + data[i]._id +"' id='addNote' class='btn btn-secondary'>Add Note</button><button type='button' "+ "data-id='" + data[i]._id +"' id='saveArticle' class='btn btn-secondary'>Save!</button></p>");
+      }
+    });
+});
 
 // grab articles as a JSON object
 // $(document).on("click", "#scrape", function() {
@@ -76,4 +90,24 @@ $(document).on("click", "#savenote", function() {
     // clear note area
     $("#titleinput").val("");
     $("#bodyinput").val("");
+});
+
+
+// save article to database
+$(document).on("click", "#saveArticle", function() {
+  var thisId = $(this).attr("data-id");
+  $.ajax({
+    method: "POST",
+    url: "/saveArticle/" + thisId,
+    data: {
+      saveArticle: true
+    }
+  }).done(function(err, data) {
+    if(err) {
+      console.log("Error saving article: " + err);
+    }
+    else {
+      console.log("Saved article: " + data);
+    }
+  });
 });

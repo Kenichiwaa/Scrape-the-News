@@ -52,6 +52,18 @@ router.get("/articles", function(req, res) {
   });
 });
 
+router.get("/saved", function(req, res) {
+  Article.find({saveArticle: true}, function(err, doc) {
+    if(err) {
+      console.log("Error finding saved articles: " + err);
+    }
+    // send json object to the broswer
+    else {
+      res.json(doc);
+    }
+  });
+});
+
 // -----------------------------------------------------------------------------
 // -----------------------------------------------------------------------------
 // I think you need to have an empty array outside the .each function
@@ -73,7 +85,7 @@ router.get("/scrape", function(req, res) {
         // Save these results in an object that we'll push into the result array we defined earlier
         result.title = $(element).text();
         result.link = 'http://www.roadandtrack.com' + $(element).attr("href");
-        result.save = false;
+        result.saveArticle = false;
         // This effectively passes the result object to the entry (and the title and link)
         var entry = new Article(result);
 
@@ -172,6 +184,19 @@ router.post("/articles/:id", function(req, res) {
       });
     }
   });
+});
+
+
+router.post("/saveArticle/:id", function(req, res) {
+  Article.findOneAndUpdate( {"_id": req.params.id,}, {"saveArticle": true} )
+          .exec(function(err, doc) {
+            if(err) {
+              console.log("Error finding article to update with note :" + err);
+            }
+            else {
+              res.send("Article saved!: " + doc);
+            }
+          });
 });
 
 
