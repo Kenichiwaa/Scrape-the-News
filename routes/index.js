@@ -35,9 +35,12 @@ router.get('/', function(req, res, next) {
   res.render('index');
 });
 
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 // grab articles from mongoose
 router.get("/articles", function(req, res) {
-  console.log("I am in the route all!");
+
   Article.find({}, function(err, doc) {
     if(err) {
       console.log("Article get error :" + err);
@@ -49,34 +52,84 @@ router.get("/articles", function(req, res) {
   });
 });
 
-// scrape from website
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+// I think you need to have an empty array outside the .each function
+// and inside the .each function declare a result object. Build it, then push
+// to the array at the end of the .each loop. Then send the array filled with
+// results objects
+
+
+// // scrape from website
 router.get("/scrape", function(req, res) {
   // request site to scrape and return data as a callback
   request('http://www.roadandtrack.com/', function (error, response, html) {
-    var $ = cheerio.load(html);
+    var $ = cheerio
+      .load(html);
     // select desired classes to target
-    $('a.landing-feed--story-title').each(function(i, element){
+    $('a.landing-feed--story-title')
+      .each(function(i, element){
+        var result = {};
+        // Save these results in an object that we'll push into the result array we defined earlier
+        result.title = $(element).text();
+        result.link = 'http://www.roadandtrack.com' + $(element).attr("href");
+        result.save = false;
+        // This effectively passes the result object to the entry (and the title and link)
+        var entry = new Article(result);
 
-      // Save these results in an object that we'll push into the result array we defined earlier
-      var result = {};
-      result.title = $(element).text();
-      result.link = 'http://www.roadandtrack.com' + $(element).attr("href");
-
-      // create new entry using Article model
-      var entry = new Article(result);
-
-      entry.save(function(err, doc) {
-        if(err) {
-          console.log("Article save error :" + err);
-        }
-        else {
-          console.log(doc);
-        }
-      });
+        // Now, save that entry to the db
+        entry.save(function(err, doc) {
+          // Log any errors
+          if (err) {
+            console.log(err);
+          }
+          // Or log the doc
+          else {
+            //console.log(doc);
+          }
+        });
     });
   });
   res.send("Scrape Complete");
 });
+
+
+// -----------------------------------------------------------------------------
+
+// -----------------------------------------------------------------------------
+
+// scrape from website
+// router.get("/scrape", function(req, res) {
+//   // request site to scrape and return data as a callback
+//   request('http://www.roadandtrack.com/', function (error, response, html) {
+//     var $ = cheerio.load(html);
+//     // select desired classes to target
+//     $('a.landing-feed--story-title').each(function(i, element){
+//
+//       // Save these results in an object that we'll push into the result array we defined earlier
+//       var result = {};
+//       result.title = $(element).text();
+//       result.link = 'http://www.roadandtrack.com' + $(element).attr("href");
+//
+//       // create new entry using Article model
+//       var entry = new Article(result);
+//
+//       entry.save(function(err, doc) {
+//         if(err) {
+//           console.log("Article save error :" + err);
+//         }
+//         else {
+//           console.log(doc);
+//           res.json(doc);
+//         }
+//       });
+//     });
+//   });
+//   res.send("Scrape Complete");
+// });
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // grab articles by article ID
 router.get("/articles/:id", function(req, res) {
@@ -94,6 +147,9 @@ router.get("/articles/:id", function(req, res) {
     }
   });
 });
+
+// -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 // Create a new note, or replace an existing one
 router.post("/articles/:id", function(req, res) {

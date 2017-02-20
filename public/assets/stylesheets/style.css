@@ -105,9 +105,9 @@ textarea {
 }
 
 .navbar.scrolled {
-    color: blue;
+    color: rgba(94, 94, 94, 0.61);
     border-bottom: 1px solid #DCDCDC;
-    background: blue;
+    background: rgba(94, 94, 94, 0.61);
 
 }
 /*navbar links*/

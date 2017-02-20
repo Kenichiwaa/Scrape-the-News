@@ -23,6 +23,7 @@ app.set('view engine', 'hbs');
 // route hbs partials
 hbss.registerPartial('nav', fs.readFileSync(__dirname + '/views/partials/nav.hbs', 'utf8'));
 hbss.registerPartial('parallax', fs.readFileSync(__dirname + '/views/partials/parallax.hbs', 'utf8'));
+hbss.registerPartial('modal', fs.readFileSync(__dirname + '/views/partials/modal.hbs', 'utf8'));
 
 
 // uncomment after placing your favicon in /public
